@@ -5,7 +5,7 @@ Medial/Lateral/PF OA, Effusion, Synovitis, Baker's cyst, Contusion, Fracture) fr
 knee MRI studies, for the [RSNA Knee Abnormality Detection](https://www.kaggle.com/competitions/rsna-knee-abnormality-detection)
 Kaggle competition.
 
-Current public leaderboard score: **0.821**
+Current public leaderboard score: **0.841**
 
 ## Repo layout
 
@@ -95,13 +95,6 @@ one, keep the notebook's `%%writefile` cell in sync (or vice versa).
   natural photos, not medical imaging - RadImageNet (1.35M annotated CT/MRI/ultrasound
   images) has published results beating ImageNet-style pretraining on radiology
   transfer tasks, and should be a closer starting point for knee MRI specifically.
-- **Test-time augmentation (TTA).** Flip/rotate the 6 slots at inference and average
-  predictions across augmented views - no retraining required, stacks on top of the
-  existing fold ensemble.
-- **More depth-slices per slot.** Currently 3 slices per slot; increasing this gives
-  the model more of each slot's actual 3D structure, which may matter most for the
-  weakest labels (Meniscus, MCL) where the finding is small and easy to miss in a
-  narrow slice window.
 - **Grouped (not random) k-fold, grouped by scanner/site if identifiable.** Competition
   discussion has documented that random k-fold on this dataset inflates AUC by ~0.05
   through scanner memorization - the model learning to recognize which machine/site
@@ -111,11 +104,6 @@ one, keep the notebook's `%%writefile` cell in sync (or vice versa).
   the same DINOv2 architecture; ensembling predictions from a genuinely different
   backbone (e.g. RadImageNet-ResNet50 alongside DINOv2) tends to reduce correlated
   errors more than ensembling 5 copies of the same architecture.
-- **Meniscus-specific ROI crop.** If more slices don't move the Meniscus/MCL AUCs
-  much, the 130mm physical crop may be including too much irrelevant tissue relative
-  to how small these findings are - a tighter, finding-specific crop could help. Lower
-  priority than the above since it's a bigger preprocessing change for an uncertain
-  payoff.
 - **Prompt caching in `llm-api-labeler.ipynb`.** The system prompt is repeated on every
   API call across ~4,349 reports - Anthropic's prompt caching would cut labeling cost
   without changing any output, worth doing if the labeler gets rerun.
